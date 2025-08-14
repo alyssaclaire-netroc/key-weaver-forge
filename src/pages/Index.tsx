@@ -26,7 +26,7 @@ const Index = () => {
 
   const handleLoginSubmit = (email: string) => {
     setUserEmail(email);
-    setCurrentStep("new-user-check");
+    setCurrentStep("dashboard");
   };
 
   const handleSignupSubmit = (email: string) => {
@@ -94,15 +94,6 @@ const Index = () => {
         <AuthModal 
           onAuthSuccess={handleLoginSubmit} 
           onSignupSuccess={handleSignupSubmit}
-        />
-      );
-
-    case "new-user-check":
-      return (
-        <NewUserDialog
-          open={true}
-          onNewUser={handleNewUser}
-          onExistingUser={handleExistingUser}
         />
       );
 
