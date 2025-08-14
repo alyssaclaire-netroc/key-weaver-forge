@@ -26,7 +26,7 @@ const Index = () => {
 
   const handleLoginSubmit = (email: string) => {
     setUserEmail(email);
-    setCurrentStep("dashboard");
+    setCurrentStep("password-reset-check");
   };
 
   const handleSignupSubmit = (email: string) => {
