@@ -1,14 +1,39 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import AuthModal from "@/components/auth/AuthModal";
+import PersonaSelection from "@/components/PersonaSelection";
+import CommanderDashboard from "@/components/commander/CommanderDashboard";
 
 const Index = () => {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showPersonaSelection, setShowPersonaSelection] = useState(false);
+
+  const handleAuthSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleSignupSuccess = () => {
+    setShowPersonaSelection(true);
+  };
+
+  const handlePersonaComplete = () => {
+    setShowPersonaSelection(false);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setShowPersonaSelection(false);
+  };
+
+  if (showPersonaSelection) {
+    return <PersonaSelection onComplete={handlePersonaComplete} />;
+  }
+
+  if (!isAuthenticated) {
+    return <AuthModal onAuthSuccess={handleAuthSuccess} onSignupSuccess={handleSignupSuccess} />;
+  }
+
+  return <CommanderDashboard onLogout={handleLogout} />;
 };
 
 export default Index;
