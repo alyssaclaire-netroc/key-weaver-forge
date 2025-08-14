@@ -282,15 +282,27 @@ const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
             </Button>
           </form>
 
-          {/* Toggle Auth Mode */}
-          <div className="text-center mt-6">
-            <button
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
-            >
-              {isLogin ? "Create Account" : "Already have an account? Login"}
-            </button>
-          </div>
+            {/* Forgot Password Link for Login */}
+            {isLogin && (
+              <div className="text-center mt-4">
+                <button
+                  type="button"
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+
+            {/* Toggle Auth Mode */}
+            <div className="text-center mt-6">
+              <button
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              >
+                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
+              </button>
+            </div>
         </Card>
       </div>
     </div>
