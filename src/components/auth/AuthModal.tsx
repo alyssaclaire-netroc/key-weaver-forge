@@ -42,8 +42,11 @@ const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
       </div>
 
       <div className="w-full max-w-md">
-        <Card className="glass-card">
-          <CardHeader className="text-center">
+        <Card className="glass-card border-0 shadow-2xl">
+          <CardHeader className="text-center space-y-4">
+            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center mb-4">
+              <span className="text-3xl">🚀</span>
+            </div>
             <CardTitle className="text-2xl font-bold text-foreground">
               {isLogin ? "Welcome Back!" : "Join the Adventure!"}
             </CardTitle>
@@ -58,60 +61,61 @@ const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
           <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-foreground font-medium">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="glass-input"
+                  className="glass-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-foreground font-medium">Password</Label>
                 <Input
                   id="password"
                   type="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="glass-input"
+                  className="glass-input text-foreground placeholder:text-muted-foreground"
                   required
                 />
               </div>
 
               {!isLogin && (
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-foreground font-medium">Confirm Password</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
                     placeholder="Confirm your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="glass-input"
+                    className="glass-input text-foreground placeholder:text-muted-foreground"
                     required
                   />
                 </div>
               )}
 
               {!isLogin && (
-                <div className="flex items-start space-x-2">
+                <div className="flex items-start space-x-3 p-4 glass-card rounded-lg">
                   <Checkbox
                     id="terms"
                     checked={acceptedTerms}
                     onCheckedChange={(checked) => setAcceptedTerms(checked as boolean)}
+                    className="mt-0.5"
                   />
-                  <Label htmlFor="terms" className="text-xs text-muted-foreground leading-relaxed">
+                  <Label htmlFor="terms" className="text-sm text-foreground leading-relaxed cursor-pointer">
                     I agree to the{" "}
-                    <button type="button" className="text-primary underline hover:text-primary/80">
+                    <button type="button" className="text-primary underline hover:text-primary/80 font-medium">
                       Terms of Service
                     </button>{" "}
                     and{" "}
-                    <button type="button" className="text-primary underline hover:text-primary/80">
+                    <button type="button" className="text-primary underline hover:text-primary/80 font-medium">
                       Privacy Policy
                     </button>
                   </Label>
@@ -121,7 +125,11 @@ const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
               <Button
                 type="submit"
                 disabled={!canSubmit}
-                className={`w-full ${canSubmit ? 'glass-button' : 'opacity-50 cursor-not-allowed'}`}
+                className={`w-full transition-all duration-300 ${
+                  canSubmit 
+                    ? 'glass-button hover:scale-105 shadow-lg' 
+                    : 'opacity-50 cursor-not-allowed'
+                }`}
               >
                 {isLogin ? "Sign In" : "Create Account"}
               </Button>
@@ -138,7 +146,7 @@ const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
                     setConfirmPassword("");
                     setAcceptedTerms(false);
                   }}
-                  className="text-primary hover:text-primary/80 font-medium"
+                  className="text-primary hover:text-primary/80 font-medium underline transition-colors"
                 >
                   {isLogin ? "Sign up" : "Sign in"}
                 </button>

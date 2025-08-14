@@ -71,13 +71,22 @@ const CommanderDashboard = ({ onLogout }: CommanderDashboardProps) => {
   return (
     <div className="min-h-screen bg-background">
       <div className="w-full min-h-screen flex relative">
-        {/* Sidebar - Hidden by default */}
-        {sidebarVisible && (
-          <div className="w-80 flex flex-col transition-all duration-300 ease-out bg-background/95 backdrop-blur-sm border-r border-border/20">
+        {/* Sidebar */}
+        <div className={`fixed left-0 top-0 h-full transition-all duration-300 ease-out z-40 ${
+          sidebarVisible ? 'translate-x-0' : '-translate-x-full'
+        }`}>
+          <div className="w-80 h-full flex flex-col bg-background/95 backdrop-blur-sm border-r border-border/20">
             {/* Sidebar Header */}
             <div className="p-4 border-b border-border/20">
-              <div className="flex items-center gap-3">
-                <h2 className="font-bold">Menu</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="font-bold text-lg">Menu</h2>
+                <button
+                  onClick={() => setSidebarVisible(false)}
+                  className="hover:bg-white/10 p-1 rounded transition-colors"
+                  aria-label="Close sidebar"
+                >
+                  ✕
+                </button>
               </div>
             </div>
 
@@ -152,6 +161,14 @@ const CommanderDashboard = ({ onLogout }: CommanderDashboardProps) => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Sidebar Overlay */}
+        {sidebarVisible && (
+          <div 
+            className="fixed inset-0 bg-black/20 z-30"
+            onClick={() => setSidebarVisible(false)}
+          />
         )}
 
         {/* Main Content Area */}
