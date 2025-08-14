@@ -6,8 +6,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 
 interface AuthModalProps {
-  onAuthSuccess: () => void;
-  onSignupSuccess: () => void;
+  onAuthSuccess: (email: string) => void;
+  onSignupSuccess: (email: string) => void;
 }
 
 const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
@@ -76,13 +76,13 @@ const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
           title: "Welcome back!",
           description: "You have successfully logged in.",
         });
-        onAuthSuccess();
+        onAuthSuccess(formData.email);
       } else {
         toast({
           title: "Account created!",
           description: "Please complete your profile setup.",
         });
-        onSignupSuccess();
+        onSignupSuccess(formData.email);
       }
     }, 1000);
   };
@@ -95,9 +95,9 @@ const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
 
     setTimeout(() => {
       if (isLogin) {
-        onAuthSuccess();
+        onAuthSuccess("social@example.com");
       } else {
-        onSignupSuccess();
+        onSignupSuccess("social@example.com");
       }
     }, 1000);
   };
