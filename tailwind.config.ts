@@ -61,6 +61,32 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Role-based colors
+				participant: {
+					DEFAULT: 'hsl(var(--participant))',
+					foreground: 'hsl(var(--participant-foreground))'
+				},
+				'team-leader': {
+					DEFAULT: 'hsl(var(--team-leader))',
+					foreground: 'hsl(var(--team-leader-foreground))'
+				},
+				admin: {
+					DEFAULT: 'hsl(var(--admin))',
+					foreground: 'hsl(var(--admin-foreground))'
+				},
+				observer: {
+					DEFAULT: 'hsl(var(--observer))',
+					foreground: 'hsl(var(--observer-foreground))'
+				},
+				// Status colors
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
 				}
 			},
 			borderRadius: {
