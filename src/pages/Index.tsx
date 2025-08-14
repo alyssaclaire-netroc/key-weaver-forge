@@ -97,6 +97,15 @@ const Index = () => {
         />
       );
 
+    case "new-user-check":
+      return (
+        <NewUserDialog
+          open={true}
+          onNewUser={handleNewUser}
+          onExistingUser={handleExistingUser}
+        />
+      );
+
     case "password-reset-check":
       return (
         <PasswordResetDialog
