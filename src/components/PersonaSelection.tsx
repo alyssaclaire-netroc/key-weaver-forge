@@ -10,6 +10,7 @@ interface PersonaSelectionProps {
 const PersonaSelection = ({ onComplete }: PersonaSelectionProps) => {
   const [selectedPersona, setSelectedPersona] = useState<string>("");
   const [selectedSubOption, setSelectedSubOption] = useState<string>("");
+  const [selectedMemberOption, setSelectedMemberOption] = useState<string>("");
   const [age, setAge] = useState<number[]>([15]);
 
   const personas = {
@@ -25,6 +26,16 @@ const PersonaSelection = ({ onComplete }: PersonaSelectionProps) => {
       description: "Enhance workplace engagement and productivity",
       subOptions: ["HR", "Supervisor", "Manager", "Employees"]
     },
+    individual: {
+      icon: "👤",
+      title: "Individual",
+      description: "Personal growth and fitness journey",
+      subOptions: ["Football Player", "Fitness Coach"],
+      memberOptions: {
+        "Football Player": ["Member", "Teams"],
+        "Fitness Coach": ["Members"]
+      }
+    },
     education: {
       icon: "🎓",
       title: "Education",
@@ -36,15 +47,22 @@ const PersonaSelection = ({ onComplete }: PersonaSelectionProps) => {
   const handlePersonaSelect = (persona: string) => {
     setSelectedPersona(persona);
     setSelectedSubOption("");
+    setSelectedMemberOption("");
   };
 
   const handleSubOptionSelect = (subOption: string) => {
     setSelectedSubOption(subOption);
+    setSelectedMemberOption("");
+  };
+
+  const handleMemberOptionSelect = (memberOption: string) => {
+    setSelectedMemberOption(memberOption);
   };
 
   const canContinue = selectedPersona && (
     (selectedPersona === "education") ||
-    (selectedPersona !== "education" && selectedSubOption)
+    (selectedPersona === "individual" && selectedSubOption && selectedMemberOption) ||
+    (selectedPersona !== "education" && selectedPersona !== "individual" && selectedSubOption)
   );
 
   const handleContinue = () => {
@@ -97,21 +115,41 @@ const PersonaSelection = ({ onComplete }: PersonaSelectionProps) => {
                   </CardContent>
                 </Card>
 
-                {/* Sub-options for Community and Company */}
+                {/* Sub-options for Community, Company, and Individual */}
                 {selectedPersona === key && persona.subOptions.length > 0 && (
                   <div className="mt-3 ml-4 space-y-2 animate-fade-in">
                     {persona.subOptions.map((option) => (
-                      <button
-                        key={option}
-                        onClick={() => handleSubOptionSelect(option)}
-                        className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${
-                          selectedSubOption === option
-                            ? 'glass-button text-primary-foreground'
-                            : 'glass-input hover:bg-white/20'
-                        }`}
-                      >
-                        {option}
-                      </button>
+                      <div key={option}>
+                        <button
+                          onClick={() => handleSubOptionSelect(option)}
+                          className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${
+                            selectedSubOption === option
+                              ? 'glass-button text-primary-foreground'
+                              : 'glass-input hover:bg-white/20'
+                          }`}
+                        >
+                          {option}
+                        </button>
+                        
+                        {/* Member options for Individual persona */}
+                        {selectedPersona === "individual" && selectedSubOption === option && personas.individual.memberOptions && personas.individual.memberOptions[option] && (
+                          <div className="mt-2 ml-4 space-y-2 animate-fade-in">
+                            {personas.individual.memberOptions[option].map((memberOption) => (
+                              <button
+                                key={memberOption}
+                                onClick={() => handleMemberOptionSelect(memberOption)}
+                                className={`w-full text-left p-2 rounded-lg transition-all duration-300 text-sm ${
+                                  selectedMemberOption === memberOption
+                                    ? 'glass-button text-primary-foreground'
+                                    : 'glass-input hover:bg-white/20'
+                                }`}
+                              >
+                                {memberOption}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     ))}
                   </div>
                 )}
