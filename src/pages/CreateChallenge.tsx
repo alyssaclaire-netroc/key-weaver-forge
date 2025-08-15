@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Upload, Plus, Minus, Check, Search, Calendar, Users, Settings, Trophy, Target, Eye, EyeOff, Star, Award, Gem } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Upload, Plus, Minus, Check, Search, Calendar, Users, Settings, Trophy, Target, Eye, EyeOff, Star, Award, Gem, Gift, Coins, Crown, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -854,13 +854,19 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
   // Page 5: Rewards
   const renderStep5 = () => (
     <div className="space-y-6">
-      <div className="text-center mb-6">
+      <div className="rocket-card p-6 text-center mb-6">
+        <div className="w-16 h-16 mx-auto bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-full flex items-center justify-center mb-4">
+          <Gift className="w-8 h-8 text-yellow-600" />
+        </div>
         <h2 className="text-2xl font-bold mb-2">Rewards</h2>
         <p className="text-muted-foreground">Define the rewards for the challenge</p>
       </div>
 
-      <div>
-        <label className="block text-sm font-semibold mb-4">Challenge Reward Type *</label>
+      <div className="rocket-card p-4">
+        <label className="block text-sm font-semibold mb-4 flex items-center gap-2">
+          <Trophy className="w-4 h-4 text-primary" />
+          Challenge Reward Type *
+        </label>
         <div className="space-y-4">
           <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
             <input
@@ -871,9 +877,12 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
               onChange={(e) => setFormData(prev => ({ ...prev, rewardType: e.target.value }))}
               className="w-4 h-4"
             />
-            <div>
-              <div className="font-medium">Reward Point System</div>
-              <div className="text-sm text-muted-foreground">Participants earn points for completing tasks</div>
+            <div className="flex items-center gap-2">
+              <Star className="w-5 h-5 text-yellow-500" />
+              <div>
+                <div className="font-medium">Reward Point System</div>
+                <div className="text-sm text-muted-foreground">Participants earn points for completing tasks</div>
+              </div>
             </div>
           </label>
 
@@ -886,18 +895,49 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
               onChange={(e) => setFormData(prev => ({ ...prev, rewardType: e.target.value }))}
               className="w-4 h-4"
             />
-            <div>
-              <div className="font-medium">Non-Reward Point System</div>
-              <div className="text-sm text-muted-foreground">No points, but rewards like gems or badges</div>
+            <div className="flex items-center gap-2">
+              <Gift className="w-5 h-5 text-purple-500" />
+              <div>
+                <div className="font-medium">Non-Reward Point System</div>
+                <div className="text-sm text-muted-foreground">No points, but rewards like gems or badges</div>
+              </div>
             </div>
           </label>
         </div>
       </div>
 
+      {formData.rewardType === 'non-reward-points' && (
+        <div className="rocket-card p-4">
+          <label className="block text-sm font-semibold mb-4 flex items-center gap-2">
+            <Gem className="w-4 h-4 text-purple-500" />
+            Non Reward Points
+          </label>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Gems</label>
+              <Input
+                type="number"
+                min="0"
+                placeholder="Number of gems"
+                value={formData.gemsReward}
+                onChange={(e) => setFormData(prev => ({ ...prev, gemsReward: parseInt(e.target.value) || 0 }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Badge</label>
+              <Input placeholder="Badge name" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {formData.rewardType === 'reward-points' && (
         <div className="space-y-6 border-t pt-6">
           <div>
-            <label className="block text-sm font-semibold mb-4">Points Counter</label>
+          <label className="block text-sm font-semibold mb-4 flex items-center gap-2">
+            <Zap className="w-4 h-4 text-blue-500" />
+            Points Counter
+          </label>
             <div className="space-y-3">
               <label className="flex items-center space-x-3">
                 <input
@@ -947,11 +987,13 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
           </div>
         </div>
       )}
-
       <div className="space-y-6 border-t pt-6">
-        <div>
+        <div className="rocket-card p-4">
           <div className="flex items-center justify-between mb-4">
-            <label className="text-sm font-semibold">Badge Rewards</label>
+            <label className="text-sm font-semibold flex items-center gap-2">
+              <Award className="w-4 h-4 text-purple-500" />
+              Badge Rewards
+            </label>
             <Switch
               checked={formData.badgeRewards}
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, badgeRewards: checked }))}
@@ -1042,8 +1084,11 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
         </div>
 
         <div className="grid grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-semibold mb-2">Points Rewards</label>
+          <div className="rocket-card p-4">
+            <label className="block text-sm font-semibold mb-2 flex items-center gap-2">
+              <Coins className="w-4 h-4 text-yellow-500" />
+              Points Rewards
+            </label>
             <Input
               type="number"
               min="0"
@@ -1053,8 +1098,11 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold mb-2">Gems Rewards</label>
+          <div className="rocket-card p-4">
+            <label className="block text-sm font-semibold mb-2 flex items-center gap-2">
+              <Gem className="w-4 h-4 text-purple-500" />
+              Gems Rewards
+            </label>
             <div className="space-y-2">
               <Input
                 type="number"
