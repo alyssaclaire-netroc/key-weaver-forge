@@ -30,11 +30,13 @@ const PersonaSelection = ({ onComplete }: PersonaSelectionProps) => {
       icon: "👤",
       title: "Individual",
       description: "Personal growth and fitness journey",
-      subOptions: ["Football Player", "Fitness Coach"],
-      memberOptions: {
-        "Football Player": ["Member", "Teams"],
-        "Fitness Coach": ["Members"]
-      }
+      subOptions: ["Members", "Teams"]
+    },
+    fitnessCoach: {
+      icon: "💪",
+      title: "Fitness Coach",
+      description: "Help others achieve their fitness goals",
+      subOptions: ["Members"]
     },
     education: {
       icon: "🎓",
@@ -61,8 +63,7 @@ const PersonaSelection = ({ onComplete }: PersonaSelectionProps) => {
 
   const canContinue = selectedPersona && (
     (selectedPersona === "education") ||
-    (selectedPersona === "individual" && selectedSubOption && selectedMemberOption) ||
-    (selectedPersona !== "education" && selectedPersona !== "individual" && selectedSubOption)
+    (selectedPersona !== "education" && selectedSubOption)
   );
 
   const handleContinue = () => {
@@ -115,41 +116,21 @@ const PersonaSelection = ({ onComplete }: PersonaSelectionProps) => {
                   </CardContent>
                 </Card>
 
-                {/* Sub-options for Community, Company, and Individual */}
+                {/* Sub-options for all personas except Education */}
                 {selectedPersona === key && persona.subOptions.length > 0 && (
                   <div className="mt-3 ml-4 space-y-2 animate-fade-in">
                     {persona.subOptions.map((option) => (
-                      <div key={option}>
-                        <button
-                          onClick={() => handleSubOptionSelect(option)}
-                          className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${
-                            selectedSubOption === option
-                              ? 'glass-button text-primary-foreground'
-                              : 'glass-input hover:bg-white/20'
-                          }`}
-                        >
-                          {option}
-                        </button>
-                        
-                        {/* Member options for Individual persona */}
-                        {selectedPersona === "individual" && selectedSubOption === option && personas.individual.memberOptions && personas.individual.memberOptions[option] && (
-                          <div className="mt-2 ml-4 space-y-2 animate-fade-in">
-                            {personas.individual.memberOptions[option].map((memberOption) => (
-                              <button
-                                key={memberOption}
-                                onClick={() => handleMemberOptionSelect(memberOption)}
-                                className={`w-full text-left p-2 rounded-lg transition-all duration-300 text-sm ${
-                                  selectedMemberOption === memberOption
-                                    ? 'glass-button text-primary-foreground'
-                                    : 'glass-input hover:bg-white/20'
-                                }`}
-                              >
-                                {memberOption}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      <button
+                        key={option}
+                        onClick={() => handleSubOptionSelect(option)}
+                        className={`w-full text-left p-3 rounded-lg transition-all duration-300 ${
+                          selectedSubOption === option
+                            ? 'glass-button text-primary-foreground'
+                            : 'glass-input hover:bg-white/20'
+                        }`}
+                      >
+                        {option}
+                      </button>
                     ))}
                   </div>
                 )}

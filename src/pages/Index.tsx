@@ -63,7 +63,7 @@ const Index = () => {
     } else if (otpPurpose === "password-reset") {
       setCurrentStep("password-reset");
     } else if (otpPurpose === "login") {
-      setCurrentStep("password-reset-check");
+      setCurrentStep("dashboard");
     }
   };
 
