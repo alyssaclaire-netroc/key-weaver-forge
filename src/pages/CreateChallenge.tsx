@@ -449,27 +449,41 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
       </div>
 
       <div>
-        <label className="block text-sm font-semibold mb-4">Select Target Audience 🎯 *</label>
-        <div className="space-y-3">
-          {Object.entries(targetAudienceOptions).map(([persona, audiences]) => (
-            <div key={persona} className="space-y-2">
-              <h4 className="font-medium capitalize">{persona}</h4>
-              {audiences.map(audience => (
-                <label key={audience} className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="targetAudience"
-                    value={audience}
-                    checked={formData.targetAudience === audience}
-                    onChange={(e) => setFormData(prev => ({ ...prev, targetAudience: e.target.value }))}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-sm">{audience}</span>
-                </label>
-              ))}
-            </div>
-          ))}
-        </div>
+        <label htmlFor="targetAudience" className="block text-sm font-semibold mb-4">Select Target Audience 🎯 *</label>
+        <select
+          id="targetAudience"
+          value={formData.targetAudience}
+          onChange={(e) => setFormData(prev => ({ ...prev, targetAudience: e.target.value }))}
+          className="w-full p-3 border border-input rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          required
+        >
+          <option value="">Choose target audience...</option>
+          <optgroup label="Community">
+            {targetAudienceOptions.community.map((audience) => (
+              <option key={audience} value={`community-${audience}`}>{audience}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Company">
+            {targetAudienceOptions.company.map((audience) => (
+              <option key={audience} value={`company-${audience}`}>{audience}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Education">
+            {targetAudienceOptions.education.map((audience) => (
+              <option key={audience} value={`education-${audience}`}>{audience}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Individual">
+            {targetAudienceOptions.individual.map((audience) => (
+              <option key={audience} value={`individual-${audience}`}>{audience}</option>
+            ))}
+          </optgroup>
+          <optgroup label="Fitness Coach">
+            {targetAudienceOptions.fitnessCoach.map((audience) => (
+              <option key={audience} value={`fitnessCoach-${audience}`}>{audience}</option>
+            ))}
+          </optgroup>
+        </select>
       </div>
     </div>
   );
@@ -1168,7 +1182,7 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto max-w-2xl p-6">
+      <div className="max-w-md mx-auto px-6">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-6">
             <Button
