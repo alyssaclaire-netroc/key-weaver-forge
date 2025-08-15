@@ -1,36 +1,83 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Upload, Plus, Minus, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Upload, Plus, Minus, Check, Search, Calendar, Users, Settings, Trophy, Target, Eye, EyeOff, Star, Award, Gem } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
 interface CreateChallengeProps {
   onBack: () => void;
 }
 
+interface Team {
+  id: number;
+  name: string;
+  logo: File | null;
+  members: string[];
+  socialMedia: string;
+}
+
 interface Stage {
   id: number;
   name: string;
-  rewards: string;
+  points: number;
+  gems: number;
+  hasBadge: boolean;
+  badgeName: string;
+  badgeIcon: string;
+}
+
+interface BadgeTier {
+  id: number;
+  name: string;
+  icon: string;
+  minPoints: number;
+  maxPoints: number;
 }
 
 const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
+    // Page 1: Challenge Details
+    name: '',
     description: '',
-    uploadedFile: null as File | null,
-    category: '',
-    mode: '',
+    banner: null as File | null,
+    allowLeadership: false,
+    targetAudience: '',
+    
+    // Page 2: Challenge Type
+    challengeType: '', // 'individual' or 'team'
     teamSize: 2,
-    teamNameGuidelines: '',
-    difficulty: '',
-    visibility: 'public',
-    isMultiStage: false,
-    stages: [{ id: 1, name: '', rewards: '' }] as Stage[],
-    rewards: [] as string[],
+    teams: [] as Team[],
+    
+    // Page 3: Challenge Visibility
+    visibility: '', // 'public' or 'private'
+    participantLimit: 100,
+    selectedParticipants: [] as string[],
+    
+    // Page 4: Challenge Structure
+    structure: '', // 'multi-stage' or 'single-stage'
+    stages: [] as Stage[],
+    
+    // Page 5: Rewards
+    rewardType: '', // 'reward-points' or 'non-reward-points'
+    pointsCounter: '', // 'once-off' or 'recurring'
+    hasMaxPoints: false,
+    maxPointsPerStaff: 0,
+    badgeRewards: false,
+    badgeTiers: [] as BadgeTier[],
+    pointsReward: 0,
+    gemsReward: 0,
+    gemType: 'bronze',
+    
+    // Page 6: Summary & Admin Assignment
+    admins: [] as string[],
+    verifiers: [] as string[],
+    supporters: [] as string[],
     publishStart: '',
     publishEnd: '',
     challengeStart: '',
@@ -39,48 +86,28 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
 
   const { toast } = useToast();
 
-  const categories = [
-    { id: 'football', name: 'Football', icon: '⚽' },
-    { id: 'basketball', name: 'Basketball', icon: '🏀' },
-    { id: 'running', name: 'Running', icon: '🏃' },
-    { id: 'cycling', name: 'Cycling', icon: '🚴' },
-    { id: 'swimming', name: 'Swimming', icon: '🏊' },
-    { id: 'fitness', name: 'Fitness', icon: '💪' }
-  ];
+  // Target audience options based on persona
+  const targetAudienceOptions = {
+    community: ['Team leaders', 'Youth', 'Parents', 'Volunteers'],
+    company: ['HR', 'Supervisors', 'Managers', 'Employees'],
+    education: ['18-24 years'],
+    individual: ['Football players', 'Team members'],
+    fitnessCoach: ['Members']
+  };
 
-  const modes = [
-    { id: 'single', name: 'Single Player', icon: '👤', description: 'Individual challenge' },
-    { id: 'team', name: 'Team', icon: '👥', description: 'Team-based challenge' }
-  ];
-
-  const difficulties = [
-    { id: 'easy', name: 'Easy', icon: '🟢', color: 'text-success' },
-    { id: 'medium', name: 'Medium', icon: '🟡', color: 'text-warning' },
-    { id: 'hard', name: 'Hard', icon: '🔴', color: 'text-danger' }
-  ];
-
-  const visibilityOptions = [
-    { id: 'public', name: 'Public', icon: '🌍', description: 'Anyone can join' },
-    { id: 'private', name: 'Private', icon: '🔒', description: 'Invite only' }
-  ];
-
-  const rewardOptions = [
-    { id: 'badges', name: 'Badges', icon: '🏆', description: 'Digital achievement badges' },
-    { id: 'points', name: 'Points', icon: '⭐', description: 'Experience points system' },
-    { id: 'custom', name: 'Custom Rewards', icon: '🎁', description: 'Physical or digital prizes' }
-  ];
+  const gemTypes = ['bronze', 'silver', 'gold'];
+  const badgeIcons = ['🏆', '🥇', '🥈', '🥉', '⭐', '🎖️', '🏅', '👑'];
 
   const nextStep = async () => {
     if (validateCurrentStep()) {
       setIsLoading(true);
-      // Simulate a small delay for better UX
       await new Promise(resolve => setTimeout(resolve, 300));
-      setCurrentStep(prev => Math.min(prev + 1, 4));
+      setCurrentStep(prev => Math.min(prev + 1, 7));
       setIsLoading(false);
-
+      
       toast({
         title: "Step Completed!",
-        description: `Moving to step ${Math.min(currentStep + 1, 4)}`,
+        description: `Moving to step ${Math.min(currentStep + 1, 7)}`,
       });
     }
   };
@@ -92,54 +119,82 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
   const validateCurrentStep = () => {
     switch (currentStep) {
       case 1:
-        if (!formData.title.trim()) {
+        if (!formData.name.trim()) {
           toast({
             title: "Missing Information",
-            description: "Please enter a challenge title",
+            description: "Please enter a challenge name",
             variant: "destructive"
           });
           return false;
         }
         if (!formData.description.trim()) {
           toast({
-            title: "Missing Information",
-            description: "Please enter a challenge description",
+            title: "Missing Information", 
+            description: "Please enter a description",
             variant: "destructive"
           });
           return false;
         }
-        if (!formData.category) {
+        if (!formData.targetAudience) {
           toast({
             title: "Missing Information",
-            description: "Please select a category",
+            description: "Please select a target audience",
             variant: "destructive"
           });
           return false;
         }
         break;
       case 2:
-        if (!formData.mode) {
+        if (!formData.challengeType) {
           toast({
-            title: "Missing Settings",
-            description: "Please select a challenge mode",
+            title: "Missing Information",
+            description: "Please select a challenge type",
             variant: "destructive"
           });
           return false;
         }
-        if (!formData.difficulty) {
+        if (formData.challengeType === 'team' && formData.teams.length === 0) {
           toast({
-            title: "Missing Settings",
-            description: "Please select a difficulty level",
+            title: "Missing Information",
+            description: "Please add at least one team",
             variant: "destructive"
           });
           return false;
         }
         break;
       case 3:
-        if (formData.rewards.length === 0) {
+        if (!formData.visibility) {
           toast({
             title: "Missing Information",
-            description: "Please select at least one reward type",
+            description: "Please select challenge visibility",
+            variant: "destructive"
+          });
+          return false;
+        }
+        break;
+      case 4:
+        if (!formData.structure) {
+          toast({
+            title: "Missing Information",
+            description: "Please select challenge structure",
+            variant: "destructive"
+          });
+          return false;
+        }
+        if (formData.structure === 'multi-stage' && formData.stages.length === 0) {
+          toast({
+            title: "Missing Information",
+            description: "Please add at least one stage",
+            variant: "destructive"
+          });
+          return false;
+        }
+        break;
+      case 5:
+        if (!formData.rewardType) {
+          toast({
+            title: "Missing Information",
+            description: "Please select a reward type",
             variant: "destructive"
           });
           return false;
@@ -149,60 +204,7 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
     return true;
   };
 
-  const selectCategory = (category: string) => {
-    setFormData(prev => ({ ...prev, category }));
-  };
-
-  const selectMode = (mode: string) => {
-    setFormData(prev => ({ ...prev, mode }));
-  };
-
-  const selectDifficulty = (difficulty: string) => {
-    setFormData(prev => ({ ...prev, difficulty }));
-  };
-
-  const selectVisibility = (visibility: string) => {
-    setFormData(prev => ({ ...prev, visibility }));
-  };
-
-  const toggleReward = (reward: string) => {
-    setFormData(prev => ({
-      ...prev,
-      rewards: prev.rewards.includes(reward)
-        ? prev.rewards.filter(r => r !== reward)
-        : [...prev.rewards, reward]
-    }));
-  };
-
-  const toggleMultiStage = () => {
-    setFormData(prev => ({ ...prev, isMultiStage: !prev.isMultiStage }));
-  };
-
-  const addStage = () => {
-    const newId = Math.max(...formData.stages.map(s => s.id)) + 1;
-    setFormData(prev => ({
-      ...prev,
-      stages: [...prev.stages, { id: newId, name: '', rewards: '' }]
-    }));
-  };
-
-  const removeStage = (id: number) => {
-    if (formData.stages.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        stages: prev.stages.filter(s => s.id !== id)
-      }));
-    }
-  };
-
-  const updateStage = (id: number, field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      stages: prev.stages.map(s => s.id === id ? { ...s, [field]: value } : s)
-    }));
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'banner' | 'teamLogo', teamId?: number) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
@@ -213,8 +215,110 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
         });
         return;
       }
-      setFormData(prev => ({ ...prev, uploadedFile: file }));
+      
+      if (type === 'banner') {
+        setFormData(prev => ({ ...prev, banner: file }));
+      } else if (type === 'teamLogo' && teamId) {
+        setFormData(prev => ({
+          ...prev,
+          teams: prev.teams.map(team => 
+            team.id === teamId ? { ...team, logo: file } : team
+          )
+        }));
+      }
     }
+  };
+
+  const addTeam = () => {
+    const newId = formData.teams.length + 1;
+    setFormData(prev => ({
+      ...prev,
+      teams: [...prev.teams, {
+        id: newId,
+        name: '',
+        logo: null,
+        members: [],
+        socialMedia: ''
+      }]
+    }));
+  };
+
+  const removeTeam = (id: number) => {
+    setFormData(prev => ({
+      ...prev,
+      teams: prev.teams.filter(team => team.id !== id)
+    }));
+  };
+
+  const updateTeam = (id: number, field: keyof Team, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      teams: prev.teams.map(team => 
+        team.id === id ? { ...team, [field]: value } : team
+      )
+    }));
+  };
+
+  const addStage = () => {
+    const newId = formData.stages.length + 1;
+    setFormData(prev => ({
+      ...prev,
+      stages: [...prev.stages, {
+        id: newId,
+        name: '',
+        points: 0,
+        gems: 0,
+        hasBadge: false,
+        badgeName: '',
+        badgeIcon: '🏆'
+      }]
+    }));
+  };
+
+  const removeStage = (id: number) => {
+    setFormData(prev => ({
+      ...prev,
+      stages: prev.stages.filter(stage => stage.id !== id)
+    }));
+  };
+
+  const updateStage = (id: number, field: keyof Stage, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      stages: prev.stages.map(stage => 
+        stage.id === id ? { ...stage, [field]: value } : stage
+      )
+    }));
+  };
+
+  const addBadgeTier = () => {
+    const newId = formData.badgeTiers.length + 1;
+    setFormData(prev => ({
+      ...prev,
+      badgeTiers: [...prev.badgeTiers, {
+        id: newId,
+        name: '',
+        icon: '🏆',
+        minPoints: 0,
+        maxPoints: 100
+      }]
+    }));
+  };
+
+  const removeBadgeTier = (id: number) => {
+    setFormData(prev => ({
+      ...prev,
+      badgeTiers: prev.badgeTiers.filter(tier => tier.id !== id)
+    }));
+  };
+
+  const updateBadgeTier = (id: number, field: keyof BadgeTier, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      badgeTiers: prev.badgeTiers.map(tier => 
+        tier.id === id ? { ...tier, [field]: value } : tier
+      )
+    }));
   };
 
   const publishChallenge = () => {
@@ -222,31 +326,37 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
       title: "Challenge Published!",
       description: "Your challenge has been successfully published",
     });
-    setCurrentStep(4);
-  };
-
-  const saveDraft = () => {
-    toast({
-      title: "Draft Saved",
-      description: "Your challenge has been saved as a draft",
-    });
+    setCurrentStep(7);
   };
 
   const createAnother = () => {
     setCurrentStep(1);
     setFormData({
-      title: '',
+      name: '',
       description: '',
-      uploadedFile: null,
-      category: '',
-      mode: '',
+      banner: null,
+      allowLeadership: false,
+      targetAudience: '',
+      challengeType: '',
       teamSize: 2,
-      teamNameGuidelines: '',
-      difficulty: '',
-      visibility: 'public',
-      isMultiStage: false,
-      stages: [{ id: 1, name: '', rewards: '' }],
-      rewards: [],
+      teams: [],
+      visibility: '',
+      participantLimit: 100,
+      selectedParticipants: [],
+      structure: '',
+      stages: [],
+      rewardType: '',
+      pointsCounter: '',
+      hasMaxPoints: false,
+      maxPointsPerStaff: 0,
+      badgeRewards: false,
+      badgeTiers: [],
+      pointsReward: 0,
+      gemsReward: 0,
+      gemType: 'bronze',
+      admins: [],
+      verifiers: [],
+      supporters: [],
       publishStart: '',
       publishEnd: '',
       challengeStart: '',
@@ -257,81 +367,106 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
   const renderProgressBar = () => (
     <div className="mb-8">
       <div className="flex justify-between items-center mb-4">
-        {[1, 2, 3].map(step => (
+        {[1, 2, 3, 4, 5, 6].map(step => (
           <div
             key={step}
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
               step <= currentStep
                 ? 'bg-primary text-primary-foreground'
-                : 'bg-glass-dark text-muted-foreground'
+                : 'bg-muted text-muted-foreground'
             }`}
           >
             {step < currentStep ? <Check className="w-4 h-4" /> : step}
           </div>
         ))}
       </div>
-      <div className="h-2 bg-glass-dark rounded-full overflow-hidden">
+      <div className="h-2 bg-muted rounded-full overflow-hidden">
         <div
-          className="h-full bg-primary progress-fill"
-          style={{ width: `${((currentStep - 1) / 2) * 100}%` }}
+          className="h-full bg-primary transition-all duration-300"
+          style={{ width: `${((currentStep - 1) / 5) * 100}%` }}
         />
       </div>
     </div>
   );
 
+  // Page 1: Challenge Details
   const renderStep1 = () => (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold mb-2">Challenge Details</h2>
+        <p className="text-muted-foreground">Set up the basic information for your challenge</p>
+      </div>
+
       <div>
-        <label className="block text-sm font-semibold mb-2">Challenge Title *</label>
+        <label className="block text-sm font-semibold mb-2">Challenge Name 📝 *</label>
         <Input
-          placeholder="Enter challenge title"
-          value={formData.title}
-          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-          className="glass border-glass-border"
+          placeholder="Enter the name of your challenge"
+          value={formData.name}
+          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+          className="w-full"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-semibold mb-2">Description *</label>
+        <label className="block text-sm font-semibold mb-2">Description 📄 *</label>
         <Textarea
-          placeholder="Describe your challenge..."
+          placeholder="Write a brief description explaining what this challenge is all about and what participants can expect"
           value={formData.description}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-          className="glass border-glass-border min-h-[100px] resize-none"
+          className="min-h-[100px] resize-none"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-semibold mb-2">Upload Image/Video</label>
-        <div className="glass border-glass-border rounded-3xl p-8 text-center">
+        <label className="block text-sm font-semibold mb-2">Challenge Banner 🖼️</label>
+        <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center">
           <input
             type="file"
-            accept="image/*,video/*"
-            onChange={handleFileUpload}
+            accept="image/*"
+            onChange={(e) => handleFileUpload(e, 'banner')}
             className="hidden"
-            id="file-upload"
+            id="banner-upload"
           />
-          <label htmlFor="file-upload" className="cursor-pointer">
+          <label htmlFor="banner-upload" className="cursor-pointer">
             <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-sm text-muted-foreground mb-2">
-              {formData.uploadedFile ? formData.uploadedFile.name : 'Drag & drop or click to upload'}
+              {formData.banner ? formData.banner.name : 'Upload a banner image to visually represent your challenge'}
             </p>
-            <p className="text-xs text-muted-foreground">PNG, JPG, MP4 up to 10MB</p>
+            <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB</p>
           </label>
         </div>
       </div>
 
+      <div className="flex items-center justify-between">
+        <div>
+          <label className="text-sm font-semibold">Allow Leadership? 👥</label>
+          <p className="text-xs text-muted-foreground">Enable leadership roles within the challenge</p>
+        </div>
+        <Switch
+          checked={formData.allowLeadership}
+          onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allowLeadership: checked }))}
+        />
+      </div>
+
       <div>
-        <label className="block text-sm font-semibold mb-4">Category *</label>
-        <div className="grid grid-cols-2 gap-4">
-          {categories.map(category => (
-            <div
-              key={category.id}
-              onClick={() => selectCategory(category.id)}
-              className={`selection-card ${formData.category === category.id ? 'selected' : ''}`}
-            >
-              <div className="text-3xl mb-2">{category.icon}</div>
-              <div className="font-medium">{category.name}</div>
+        <label className="block text-sm font-semibold mb-4">Select Target Audience 🎯 *</label>
+        <div className="space-y-3">
+          {Object.entries(targetAudienceOptions).map(([persona, audiences]) => (
+            <div key={persona} className="space-y-2">
+              <h4 className="font-medium capitalize">{persona}</h4>
+              {audiences.map(audience => (
+                <label key={audience} className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="targetAudience"
+                    value={audience}
+                    checked={formData.targetAudience === audience}
+                    onChange={(e) => setFormData(prev => ({ ...prev, targetAudience: e.target.value }))}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">{audience}</span>
+                </label>
+              ))}
             </div>
           ))}
         </div>
@@ -339,299 +474,762 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
     </div>
   );
 
+  // Page 2: Challenge Type
   const renderStep2 = () => (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold mb-2">Challenge Type</h2>
+        <p className="text-muted-foreground">Choose the format of your challenge</p>
+      </div>
+
       <div>
-        <label className="block text-sm font-semibold mb-4">Challenge Mode *</label>
-        <div className="grid gap-4">
-          {modes.map(mode => (
-            <div
-              key={mode.id}
-              onClick={() => selectMode(mode.id)}
-              className={`selection-card ${formData.mode === mode.id ? 'selected' : ''}`}
-            >
-              <div className="flex items-center space-x-4">
-                <div className="text-2xl">{mode.icon}</div>
-                <div className="text-left">
-                  <div className="font-semibold">{mode.name}</div>
-                  <div className="text-sm text-muted-foreground">{mode.description}</div>
-                </div>
-              </div>
+        <label className="block text-sm font-semibold mb-4">Challenge Format *</label>
+        <div className="space-y-4">
+          <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+            <input
+              type="radio"
+              name="challengeType"
+              value="individual"
+              checked={formData.challengeType === 'individual'}
+              onChange={(e) => setFormData(prev => ({ ...prev, challengeType: e.target.value }))}
+              className="w-4 h-4"
+            />
+            <div>
+              <div className="font-medium">Individual Challenge 🧑‍🤝‍🧑</div>
+              <div className="text-sm text-muted-foreground">Challenge for individuals only</div>
             </div>
-          ))}
+          </label>
+
+          <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+            <input
+              type="radio"
+              name="challengeType"
+              value="team"
+              checked={formData.challengeType === 'team'}
+              onChange={(e) => setFormData(prev => ({ ...prev, challengeType: e.target.value }))}
+              className="w-4 h-4"
+            />
+            <div>
+              <div className="font-medium">Team Challenge 👥</div>
+              <div className="text-sm text-muted-foreground">Challenge for teams with multiple members</div>
+            </div>
+          </label>
         </div>
       </div>
 
-      {formData.mode === 'team' && (
-        <div className="space-y-4">
+      {formData.challengeType === 'team' && (
+        <div className="space-y-6 border-t pt-6">
           <div>
             <label className="block text-sm font-semibold mb-2">Team Size</label>
             <Input
               type="number"
               min="2"
-              max="20"
+              placeholder="Specify how many people will be in each team"
               value={formData.teamSize}
-              onChange={(e) => setFormData(prev => ({ ...prev, teamSize: parseInt(e.target.value) }))}
-              className="glass border-glass-border"
+              onChange={(e) => setFormData(prev => ({ ...prev, teamSize: parseInt(e.target.value) || 2 }))}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-semibold mb-2">Team Name Guidelines</label>
-            <Textarea
-              placeholder="Guidelines for team names..."
-              value={formData.teamNameGuidelines}
-              onChange={(e) => setFormData(prev => ({ ...prev, teamNameGuidelines: e.target.value }))}
-              className="glass border-glass-border"
-              rows={3}
-            />
-          </div>
-        </div>
-      )}
-
-      <div>
-        <label className="block text-sm font-semibold mb-4">Difficulty Level *</label>
-        <div className="grid grid-cols-3 gap-3">
-          {difficulties.map(difficulty => (
-            <div
-              key={difficulty.id}
-              onClick={() => selectDifficulty(difficulty.id)}
-              className={`selection-card ${formData.difficulty === difficulty.id ? 'selected' : ''}`}
-            >
-              <div className={`text-2xl mb-2 ${difficulty.color}`}>{difficulty.icon}</div>
-              <div className="font-medium">{difficulty.name}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold mb-4">Visibility</label>
-        <div className="grid gap-4">
-          {visibilityOptions.map(option => (
-            <div
-              key={option.id}
-              onClick={() => selectVisibility(option.id)}
-              className={`selection-card ${formData.visibility === option.id ? 'selected' : ''}`}
-            >
-              <div className="flex items-center space-x-4">
-                <div className="text-2xl">{option.icon}</div>
-                <div className="text-left">
-                  <div className="font-semibold">{option.name}</div>
-                  <div className="text-sm text-muted-foreground">{option.description}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <label className="text-sm font-semibold">Multi-Stage Challenge</label>
-          <button
-            onClick={toggleMultiStage}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-              formData.isMultiStage ? 'bg-primary' : 'bg-gray-300'
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                formData.isMultiStage ? 'translate-x-6' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </div>
-
-        {formData.isMultiStage && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="font-semibold">Challenge Stages</h4>
+            <div className="flex items-center justify-between mb-4">
+              <label className="text-sm font-semibold">Team Details</label>
               <Button
                 type="button"
-                onClick={addStage}
+                onClick={addTeam}
                 variant="outline"
                 size="sm"
-                className="glass border-glass-border"
               >
                 <Plus className="w-4 h-4 mr-1" />
-                Add Stage
+                Add Team
               </Button>
             </div>
-            {formData.stages.map((stage, index) => (
-              <div key={stage.id} className="glass border-glass-border rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h5 className="font-medium">Stage {index + 1}</h5>
-                  {formData.stages.length > 1 && (
-                    <Button
-                      type="button"
-                      onClick={() => removeStage(stage.id)}
-                      variant="ghost"
-                      size="sm"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </Button>
-                  )}
+
+            {formData.teams.map((team, index) => (
+              <div key={team.id} className="border rounded-lg p-4 space-y-4 mb-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Team {index + 1}</h4>
+                  <Button
+                    type="button"
+                    onClick={() => removeTeam(team.id)}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </Button>
                 </div>
-                <div className="space-y-3">
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Team Name</label>
                   <Input
-                    placeholder="Stage name"
-                    value={stage.name}
-                    onChange={(e) => updateStage(stage.id, 'name', e.target.value)}
-                    className="glass border-glass-border"
+                    placeholder="Enter unique team name"
+                    value={team.name}
+                    onChange={(e) => updateTeam(team.id, 'name', e.target.value)}
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Team Logo</label>
+                  <div className="border-2 border-dashed border-muted rounded-lg p-4 text-center">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, 'teamLogo', team.id)}
+                      className="hidden"
+                      id={`team-logo-${team.id}`}
+                    />
+                    <label htmlFor={`team-logo-${team.id}`} className="cursor-pointer">
+                      <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-xs text-muted-foreground">
+                        {team.logo ? team.logo.name : 'Upload team logo'}
+                      </p>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">Social Media Links</label>
                   <Input
-                    placeholder="Rewards"
-                    value={stage.rewards}
-                    onChange={(e) => updateStage(stage.id, 'rewards', e.target.value)}
-                    className="glass border-glass-border"
+                    placeholder="Add social media links for sharing"
+                    value={team.socialMedia}
+                    onChange={(e) => updateTeam(team.id, 'socialMedia', e.target.value)}
                   />
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 
+  // Page 3: Challenge Visibility
   const renderStep3 = () => (
-    <div className="space-y-6 fade-in">
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold mb-2">Challenge Visibility</h2>
+        <p className="text-muted-foreground">Set the visibility options for your challenge</p>
+      </div>
+
       <div>
-        <label className="block text-sm font-semibold mb-4">Rewards</label>
-        <div className="grid gap-4">
-          {rewardOptions.map(reward => (
-            <div
-              key={reward.id}
-              onClick={() => toggleReward(reward.id)}
-              className={`selection-card ${formData.rewards.includes(reward.id) ? 'selected' : ''}`}
+        <label className="block text-sm font-semibold mb-4">Visibility Settings *</label>
+        <div className="space-y-4">
+          <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+            <input
+              type="radio"
+              name="visibility"
+              value="public"
+              checked={formData.visibility === 'public'}
+              onChange={(e) => setFormData(prev => ({ ...prev, visibility: e.target.value }))}
+              className="w-4 h-4"
+            />
+            <div className="flex items-center space-x-2">
+              <Eye className="w-5 h-5" />
+              <div>
+                <div className="font-medium">Public Challenge 🌐</div>
+                <div className="text-sm text-muted-foreground">Open to all with participant limit control</div>
+              </div>
+            </div>
+          </label>
+
+          <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+            <input
+              type="radio"
+              name="visibility"
+              value="private"
+              checked={formData.visibility === 'private'}
+              onChange={(e) => setFormData(prev => ({ ...prev, visibility: e.target.value }))}
+              className="w-4 h-4"
+            />
+            <div className="flex items-center space-x-2">
+              <EyeOff className="w-5 h-5" />
+              <div>
+                <div className="font-medium">Private Challenge 🔒</div>
+                <div className="text-sm text-muted-foreground">Manually select participants</div>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      {formData.visibility === 'public' && (
+        <div>
+          <label className="block text-sm font-semibold mb-2">Participant Limit</label>
+          <Input
+            type="number"
+            min="1"
+            placeholder="Set maximum number of participants"
+            value={formData.participantLimit}
+            onChange={(e) => setFormData(prev => ({ ...prev, participantLimit: parseInt(e.target.value) || 100 }))}
+          />
+        </div>
+      )}
+
+      {formData.visibility === 'private' && (
+        <div>
+          <label className="block text-sm font-semibold mb-2">Select Participants</label>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-4">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <Input placeholder="Search users to invite..." />
+            </div>
+            <p className="text-sm text-muted-foreground">Search and select participants who can join the challenge</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // Page 4: Challenge Structure
+  const renderStep4 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold mb-2">Challenge Structure</h2>
+        <p className="text-muted-foreground">Decide the structure of the challenge</p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold mb-4">Challenge Structure *</label>
+        <div className="space-y-4">
+          <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+            <input
+              type="radio"
+              name="structure"
+              value="multi-stage"
+              checked={formData.structure === 'multi-stage'}
+              onChange={(e) => setFormData(prev => ({ ...prev, structure: e.target.value }))}
+              className="w-4 h-4"
+            />
+            <div>
+              <div className="font-medium">Multi-stage Challenge 🏆</div>
+              <div className="text-sm text-muted-foreground">Multiple stages where participants unlock new challenges</div>
+            </div>
+          </label>
+
+          <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+            <input
+              type="radio"
+              name="structure"
+              value="single-stage"
+              checked={formData.structure === 'single-stage'}
+              onChange={(e) => setFormData(prev => ({ ...prev, structure: e.target.value }))}
+              className="w-4 h-4"
+            />
+            <div>
+              <div className="font-medium">Single-stage Challenge 🎯</div>
+              <div className="text-sm text-muted-foreground">Simple challenge with just one stage or task</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      {formData.structure === 'multi-stage' && (
+        <div className="space-y-4 border-t pt-6">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-semibold">Challenge Stages</label>
+            <Button
+              type="button"
+              onClick={addStage}
+              variant="outline"
+              size="sm"
             >
-              <div className="flex items-center space-x-4">
-                <div className="text-2xl">{reward.icon}</div>
-                <div className="text-left">
-                  <div className="font-semibold">{reward.name}</div>
-                  <div className="text-sm text-muted-foreground">{reward.description}</div>
+              <Plus className="w-4 h-4 mr-1" />
+              Add Stage
+            </Button>
+          </div>
+
+          {formData.stages.map((stage, index) => (
+            <div key={stage.id} className="border rounded-lg p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium">Stage {index + 1}: {stage.name || 'Unnamed Stage'}</h4>
+                <Button
+                  type="button"
+                  onClick={() => removeStage(stage.id)}
+                  variant="ghost"
+                  size="sm"
+                >
+                  <Minus className="w-4 h-4" />
+                </Button>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Stage Name</label>
+                <Input
+                  placeholder="e.g., Stage 1: Warm-up"
+                  value={stage.name}
+                  onChange={(e) => updateStage(stage.id, 'name', e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Points</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Assign points"
+                    value={stage.points}
+                    onChange={(e) => updateStage(stage.id, 'points', parseInt(e.target.value) || 0)}
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Gems</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Add gems"
+                    value={stage.gems}
+                    onChange={(e) => updateStage(stage.id, 'gems', parseInt(e.target.value) || 0)}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Enable Badge for this stage</label>
+                  <Switch
+                    checked={stage.hasBadge}
+                    onCheckedChange={(checked) => updateStage(stage.id, 'hasBadge', checked)}
+                  />
+                </div>
+
+                {stage.hasBadge && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Badge Name</label>
+                      <Input
+                        placeholder="Badge name"
+                        value={stage.badgeName}
+                        onChange={(e) => updateStage(stage.id, 'badgeName', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Badge Icon</label>
+                      <div className="flex flex-wrap gap-2">
+                        {badgeIcons.map(icon => (
+                          <button
+                            key={icon}
+                            type="button"
+                            onClick={() => updateStage(stage.id, 'badgeIcon', icon)}
+                            className={`p-2 rounded border text-lg ${
+                              stage.badgeIcon === icon ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                            }`}
+                          >
+                            {icon}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
         </div>
+      )}
+    </div>
+  );
+
+  // Page 5: Rewards
+  const renderStep5 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold mb-2">Rewards</h2>
+        <p className="text-muted-foreground">Define the rewards for the challenge</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold mb-2">Publish Start</label>
-          <Input
-            type="datetime-local"
-            value={formData.publishStart}
-            onChange={(e) => setFormData(prev => ({ ...prev, publishStart: e.target.value }))}
-            className="glass border-glass-border"
-          />
+      <div>
+        <label className="block text-sm font-semibold mb-4">Challenge Reward Type *</label>
+        <div className="space-y-4">
+          <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+            <input
+              type="radio"
+              name="rewardType"
+              value="reward-points"
+              checked={formData.rewardType === 'reward-points'}
+              onChange={(e) => setFormData(prev => ({ ...prev, rewardType: e.target.value }))}
+              className="w-4 h-4"
+            />
+            <div>
+              <div className="font-medium">Reward Point System</div>
+              <div className="text-sm text-muted-foreground">Participants earn points for completing tasks</div>
+            </div>
+          </label>
+
+          <label className="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-muted/50">
+            <input
+              type="radio"
+              name="rewardType"
+              value="non-reward-points"
+              checked={formData.rewardType === 'non-reward-points'}
+              onChange={(e) => setFormData(prev => ({ ...prev, rewardType: e.target.value }))}
+              className="w-4 h-4"
+            />
+            <div>
+              <div className="font-medium">Non-Reward Point System</div>
+              <div className="text-sm text-muted-foreground">No points, but rewards like gems or badges</div>
+            </div>
+          </label>
         </div>
-        <div>
-          <label className="block text-sm font-semibold mb-2">Publish End</label>
-          <Input
-            type="datetime-local"
-            value={formData.publishEnd}
-            onChange={(e) => setFormData(prev => ({ ...prev, publishEnd: e.target.value }))}
-            className="glass border-glass-border"
-          />
+      </div>
+
+      {formData.rewardType === 'reward-points' && (
+        <div className="space-y-6 border-t pt-6">
+          <div>
+            <label className="block text-sm font-semibold mb-4">Points Counter</label>
+            <div className="space-y-3">
+              <label className="flex items-center space-x-3">
+                <input
+                  type="radio"
+                  name="pointsCounter"
+                  value="once-off"
+                  checked={formData.pointsCounter === 'once-off'}
+                  onChange={(e) => setFormData(prev => ({ ...prev, pointsCounter: e.target.value }))}
+                  className="w-4 h-4"
+                />
+                <span>Once-off: Points awarded once per achievement</span>
+              </label>
+              <label className="flex items-center space-x-3">
+                <input
+                  type="radio"
+                  name="pointsCounter"
+                  value="recurring"
+                  checked={formData.pointsCounter === 'recurring'}
+                  onChange={(e) => setFormData(prev => ({ ...prev, pointsCounter: e.target.value }))}
+                  className="w-4 h-4"
+                />
+                <span>Recurring: Points awarded every time achievement is completed</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <label className="text-sm font-semibold">Maximum Points per Staff</label>
+                <p className="text-xs text-muted-foreground">Set a limit on participant points</p>
+              </div>
+              <Switch
+                checked={formData.hasMaxPoints}
+                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, hasMaxPoints: checked }))}
+              />
+            </div>
+            {formData.hasMaxPoints && (
+              <Input
+                type="number"
+                min="0"
+                placeholder="Enter maximum points per staff"
+                value={formData.maxPointsPerStaff}
+                onChange={(e) => setFormData(prev => ({ ...prev, maxPointsPerStaff: parseInt(e.target.value) || 0 }))}
+              />
+            )}
+          </div>
         </div>
+      )}
+
+      <div className="space-y-6 border-t pt-6">
         <div>
-          <label className="block text-sm font-semibold mb-2">Challenge Start</label>
-          <Input
-            type="datetime-local"
-            value={formData.challengeStart}
-            onChange={(e) => setFormData(prev => ({ ...prev, challengeStart: e.target.value }))}
-            className="glass border-glass-border"
-          />
+          <div className="flex items-center justify-between mb-4">
+            <label className="text-sm font-semibold">Badge Rewards</label>
+            <Switch
+              checked={formData.badgeRewards}
+              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, badgeRewards: checked }))}
+            />
+          </div>
+
+          {formData.badgeRewards && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium">Badge Tiers</label>
+                <Button
+                  type="button"
+                  onClick={addBadgeTier}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Tier
+                </Button>
+              </div>
+
+              {formData.badgeTiers.map((tier, index) => (
+                <div key={tier.id} className="border rounded-lg p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium">Tier {index + 1}</h4>
+                    <Button
+                      type="button"
+                      onClick={() => removeBadgeTier(tier.id)}
+                      variant="ghost"
+                      size="sm"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Badge Name</label>
+                      <Input
+                        placeholder="e.g., Gold Medal"
+                        value={tier.name}
+                        onChange={(e) => updateBadgeTier(tier.id, 'name', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Badge Icon</label>
+                      <div className="flex flex-wrap gap-1">
+                        {badgeIcons.slice(0, 4).map(icon => (
+                          <button
+                            key={icon}
+                            type="button"
+                            onClick={() => updateBadgeTier(tier.id, 'icon', icon)}
+                            className={`p-2 rounded border ${
+                              tier.icon === icon ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+                            }`}
+                          >
+                            {icon}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Min Points</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={tier.minPoints}
+                        onChange={(e) => updateBadgeTier(tier.id, 'minPoints', parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Max Points</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={tier.maxPoints}
+                        onChange={(e) => updateBadgeTier(tier.id, 'maxPoints', parseInt(e.target.value) || 0)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <div>
-          <label className="block text-sm font-semibold mb-2">Challenge End</label>
-          <Input
-            type="datetime-local"
-            value={formData.challengeEnd}
-            onChange={(e) => setFormData(prev => ({ ...prev, challengeEnd: e.target.value }))}
-            className="glass border-glass-border"
-          />
+
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-semibold mb-2">Points Rewards</label>
+            <Input
+              type="number"
+              min="0"
+              placeholder="Points to award"
+              value={formData.pointsReward}
+              onChange={(e) => setFormData(prev => ({ ...prev, pointsReward: parseInt(e.target.value) || 0 }))}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-2">Gems Rewards</label>
+            <div className="space-y-2">
+              <Input
+                type="number"
+                min="0"
+                placeholder="Number of gems"
+                value={formData.gemsReward}
+                onChange={(e) => setFormData(prev => ({ ...prev, gemsReward: parseInt(e.target.value) || 0 }))}
+              />
+              <select
+                value={formData.gemType}
+                onChange={(e) => setFormData(prev => ({ ...prev, gemType: e.target.value }))}
+                className="w-full p-2 border rounded-md"
+              >
+                {gemTypes.map(type => (
+                  <option key={type} value={type}>
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 
-  const renderSuccess = () => (
-    <div className="text-center space-y-6 fade-in">
-      <div className="text-6xl bounce-in">🎉</div>
-      <h2 className="text-2xl font-bold">Challenge Created!</h2>
+  // Page 6: Summary & Admin Assignment
+  const renderStep6 = () => (
+    <div className="space-y-6">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold mb-2">Summary & Admin Assignment</h2>
+        <p className="text-muted-foreground">Review details and assign roles</p>
+      </div>
+
+      <div className="space-y-6">
+        <div>
+          <label className="block text-sm font-semibold mb-2">Assign Admins 🧑‍💻</label>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <Input placeholder="Search users to assign as admins..." />
+            </div>
+            <p className="text-xs text-muted-foreground">Admins have full control of the challenge</p>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold mb-2">Assign Verifiers 🛠️</label>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <Input placeholder="Search users to assign as verifiers..." />
+            </div>
+            <p className="text-xs text-muted-foreground">Verifiers validate progress and results</p>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold mb-2">Assign Supporters 🙌</label>
+          <div className="border rounded-lg p-4">
+            <div className="flex items-center space-x-2 mb-2">
+              <Search className="w-4 h-4 text-muted-foreground" />
+              <Input placeholder="Search users to assign as supporters..." />
+            </div>
+            <p className="text-xs text-muted-foreground">Supporters assist in running or promoting the challenge</p>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold mb-4">Schedule Settings 📅</label>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Publish Start 🕰️</label>
+              <Input
+                type="datetime-local"
+                value={formData.publishStart}
+                onChange={(e) => setFormData(prev => ({ ...prev, publishStart: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">When challenge goes live</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Publish End 🕰️</label>
+              <Input
+                type="datetime-local"
+                value={formData.publishEnd}
+                onChange={(e) => setFormData(prev => ({ ...prev, publishEnd: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">When challenge ends visibility</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Challenge Start 🏁</label>
+              <Input
+                type="datetime-local"
+                value={formData.challengeStart}
+                onChange={(e) => setFormData(prev => ({ ...prev, challengeStart: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">When challenge begins for participants</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Challenge End 🏁</label>
+              <Input
+                type="datetime-local"
+                value={formData.challengeEnd}
+                onChange={(e) => setFormData(prev => ({ ...prev, challengeEnd: e.target.value }))}
+              />
+              <p className="text-xs text-muted-foreground mt-1">When challenge ends for participants</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Page 7: Confirmation
+  const renderStep7 = () => (
+    <div className="text-center space-y-6">
+      <div className="text-6xl mb-4">🎉</div>
+      <h2 className="text-2xl font-bold">Challenge Published!</h2>
       <p className="text-muted-foreground">
         Your challenge has been successfully published and is now live!
       </p>
-      <Button onClick={createAnother} className="btn-primary w-full">
-        Create Another Challenge
-      </Button>
+      
+      <div className="space-y-4 pt-6">
+        <Button onClick={createAnother} className="w-full">
+          Create Another Challenge
+        </Button>
+        <Button onClick={onBack} variant="outline" className="w-full">
+          Back to Home
+        </Button>
+      </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'var(--gradient-background)' }}>
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="w-full max-w-md mx-auto">
-          <div className="glass rounded-3xl p-6 mb-6">
-            <div className="flex items-center justify-between mb-6">
-              <Button
-                onClick={onBack}
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Back
-              </Button>
-              <h1 className="text-2xl font-bold">Create Challenge</h1>
-              <div></div>
-            </div>
-
-            {currentStep < 4 && renderProgressBar()}
-
-            {currentStep === 1 && renderStep1()}
-            {currentStep === 2 && renderStep2()}
-            {currentStep === 3 && renderStep3()}
-            {currentStep === 4 && renderSuccess()}
-
-            {currentStep < 4 && (
-              <div className="flex gap-4 mt-8">
-                {currentStep > 1 && (
-                  <Button
-                    onClick={prevStep}
-                    variant="outline"
-                    className="btn-secondary flex-1"
-                    disabled={isLoading}
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Previous
-                  </Button>
-                )}
-
-                <Button
-                  onClick={currentStep === 3 ? publishChallenge : nextStep}
-                  className="btn-primary flex-1"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      {currentStep === 3 ? 'Publish Challenge' : 'Next Step'}
-                      {currentStep < 3 && <ChevronRight className="w-4 h-4 ml-1" />}
-                    </>
-                  )}
-                </Button>
-              </div>
-            )}
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto max-w-2xl p-6">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <Button
+              onClick={onBack}
+              variant="ghost"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </Button>
+            <h1 className="text-2xl font-bold">Create Challenge</h1>
+            <div></div>
           </div>
+
+          {currentStep < 7 && renderProgressBar()}
         </div>
+
+        <div className="bg-card rounded-lg p-6 mb-6">
+          {currentStep === 1 && renderStep1()}
+          {currentStep === 2 && renderStep2()}
+          {currentStep === 3 && renderStep3()}
+          {currentStep === 4 && renderStep4()}
+          {currentStep === 5 && renderStep5()}
+          {currentStep === 6 && renderStep6()}
+          {currentStep === 7 && renderStep7()}
+        </div>
+
+        {currentStep < 7 && (
+          <div className="flex gap-4">
+            {currentStep > 1 && (
+              <Button
+                onClick={prevStep}
+                variant="outline"
+                className="flex-1"
+                disabled={isLoading}
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Previous
+              </Button>
+            )}
+
+            <Button
+              onClick={currentStep === 6 ? publishChallenge : nextStep}
+              className="flex-1"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  {currentStep === 6 ? 'Publish Challenge' : 'Continue'}
+                  {currentStep < 6 && <ChevronRight className="w-4 h-4 ml-1" />}
+                </>
+              )}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
