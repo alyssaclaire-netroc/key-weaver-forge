@@ -7,6 +7,7 @@ import RoleSelection from "@/components/auth/RoleSelection";
 import PasswordResetFlow from "@/components/auth/PasswordResetFlow";
 import PersonaSelection from "@/components/PersonaSelection";
 import CommanderDashboard from "@/components/commander/CommanderDashboard";
+import CreateChallenge from "@/pages/CreateChallenge";
 
 type AuthStep = 
   | "auth" 
@@ -16,7 +17,8 @@ type AuthStep =
   | "role-selection" 
   | "password-reset" 
   | "persona-selection" 
-  | "dashboard";
+  | "dashboard"
+  | "create-challenge";
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<AuthStep>("auth");
@@ -81,6 +83,10 @@ const Index = () => {
     setCurrentStep("auth");
     setUserEmail("");
     setUserRole("");
+  };
+
+  const handleCreateChallenge = () => {
+    setCurrentStep("create-challenge");
   };
 
   const handleBackToAuth = () => {
@@ -150,7 +156,15 @@ const Index = () => {
     case "dashboard":
       return (
         <CommanderDashboard 
-          onLogout={handleLogout} 
+          onLogout={handleLogout}
+          onCreateChallenge={handleCreateChallenge}
+        />
+      );
+
+    case "create-challenge":
+      return (
+        <CreateChallenge
+          onBack={() => setCurrentStep("dashboard")}
         />
       );
 

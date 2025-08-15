@@ -49,9 +49,10 @@ const pastChallenges = [
 
 interface CommanderDashboardProps {
   onLogout: () => void;
+  onCreateChallenge?: () => void;
 }
 
-const CommanderDashboard = ({ onLogout }: CommanderDashboardProps) => {
+const CommanderDashboard = ({ onLogout, onCreateChallenge }: CommanderDashboardProps) => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>("active");
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [showPastChallenges, setShowPastChallenges] = useState(false);
@@ -65,7 +66,9 @@ const CommanderDashboard = ({ onLogout }: CommanderDashboardProps) => {
   };
 
   const handleAddChallenge = () => {
-    window.location.href = '/create-challenge';
+    if (onCreateChallenge) {
+      onCreateChallenge();
+    }
   };
 
   return (
