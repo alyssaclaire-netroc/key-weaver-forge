@@ -51,9 +51,10 @@ interface CommanderDashboardProps {
   onLogout: () => void;
   onCreateChallenge?: () => void;
   onEditProfile?: () => void;
+  profileData?: { name: string; profileImage: string };
 }
 
-const CommanderDashboard = ({ onLogout, onCreateChallenge, onEditProfile }: CommanderDashboardProps) => {
+const CommanderDashboard = ({ onLogout, onCreateChallenge, onEditProfile, profileData }: CommanderDashboardProps) => {
   const [expandedCategory, setExpandedCategory] = useState<string | null>("active");
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [showPastChallenges, setShowPastChallenges] = useState(false);
@@ -101,11 +102,21 @@ const CommanderDashboard = ({ onLogout, onCreateChallenge, onEditProfile }: Comm
                 {/* Profile Section */}
                 <div className="rocket-card p-4">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <span className="text-lg font-bold">JC</span>
-                    </div>
+                    {profileData?.profileImage ? (
+                      <img 
+                        src={profileData.profileImage} 
+                        alt="Profile" 
+                        className="w-12 h-12 rounded-full object-cover border border-border/20"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                        <span className="text-lg font-bold">
+                          {(profileData?.name || "John Commander").split(' ').map(n => n[0]).join('')}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex-1">
-                      <h3 className="font-bold text-sm">John Commander</h3>
+                      <h3 className="font-bold text-sm">{profileData?.name || "John Commander"}</h3>
                       <p className="text-xs text-muted-foreground">Commander</p>
                     </div>
                   </div>

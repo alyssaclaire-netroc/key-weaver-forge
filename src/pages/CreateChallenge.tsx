@@ -392,33 +392,38 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
   // Page 1: Challenge Details
   const renderStep1 = () => (
     <div className="space-y-6">
-      <div className="text-center mb-6">
+      <div className="rocket-card p-6 text-center mb-6">
+        <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-full flex items-center justify-center mb-4">
+          <Target className="w-8 h-8 text-primary" />
+        </div>
         <h2 className="text-2xl font-bold mb-2">Challenge Details</h2>
         <p className="text-muted-foreground">Set up the basic information for your challenge</p>
       </div>
 
-      <div>
-        <label className="block text-sm font-semibold mb-2">Challenge Name 📝 *</label>
+      <div className="space-y-4">
+
+        <div className="rocket-card p-4">
+          <label className="block text-sm font-semibold mb-2">Challenge Name 📝 *</label>
         <Input
           placeholder="Enter the name of your challenge"
           value={formData.name}
           onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
           className="w-full"
         />
-      </div>
+        </div>
 
-      <div>
-        <label className="block text-sm font-semibold mb-2">Description 📄 *</label>
+        <div className="rocket-card p-4">
+          <label className="block text-sm font-semibold mb-2">Description 📄 *</label>
         <Textarea
           placeholder="Write a brief description explaining what this challenge is all about and what participants can expect"
           value={formData.description}
           onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
           className="min-h-[100px] resize-none"
         />
-      </div>
+        </div>
 
-      <div>
-        <label className="block text-sm font-semibold mb-2">Challenge Banner 🖼️</label>
+        <div className="rocket-card p-4">
+          <label className="block text-sm font-semibold mb-2">Challenge Banner 🖼️</label>
         <div className="border-2 border-dashed border-muted rounded-lg p-8 text-center">
           <input
             type="file"
@@ -435,9 +440,10 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
             <p className="text-xs text-muted-foreground">PNG, JPG up to 10MB</p>
           </label>
         </div>
-      </div>
+        </div>
 
-      <div className="flex items-center justify-between">
+        <div className="rocket-card p-4">
+          <div className="flex items-center justify-between">
         <div>
           <label className="text-sm font-semibold">Allow Leadership? 👥</label>
           <p className="text-xs text-muted-foreground">Enable leadership roles within the challenge</p>
@@ -445,45 +451,47 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
         <Switch
           checked={formData.allowLeadership}
           onCheckedChange={(checked) => setFormData(prev => ({ ...prev, allowLeadership: checked }))}
-        />
-      </div>
+          />
+        </div>
+        </div>
 
-      <div>
-        <label htmlFor="targetAudience" className="block text-sm font-semibold mb-4">Select Target Audience 🎯 *</label>
-        <select
-          id="targetAudience"
-          value={formData.targetAudience}
-          onChange={(e) => setFormData(prev => ({ ...prev, targetAudience: e.target.value }))}
-          className="w-full p-3 border border-input rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          required
-        >
-          <option value="">Choose target audience...</option>
-          <optgroup label="Community">
-            {targetAudienceOptions.community.map((audience) => (
-              <option key={audience} value={`community-${audience}`}>{audience}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Company">
-            {targetAudienceOptions.company.map((audience) => (
-              <option key={audience} value={`company-${audience}`}>{audience}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Education">
-            {targetAudienceOptions.education.map((audience) => (
-              <option key={audience} value={`education-${audience}`}>{audience}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Individual">
-            {targetAudienceOptions.individual.map((audience) => (
-              <option key={audience} value={`individual-${audience}`}>{audience}</option>
-            ))}
-          </optgroup>
-          <optgroup label="Fitness Coach">
-            {targetAudienceOptions.fitnessCoach.map((audience) => (
-              <option key={audience} value={`fitnessCoach-${audience}`}>{audience}</option>
-            ))}
-          </optgroup>
-        </select>
+        <div className="rocket-card p-4">
+          <label htmlFor="targetAudience" className="block text-sm font-semibold mb-4">Select Target Audience 🎯 *</label>
+          <select
+            id="targetAudience"
+            value={formData.targetAudience}
+            onChange={(e) => setFormData(prev => ({ ...prev, targetAudience: e.target.value }))}
+            className="w-full p-3 border border-input rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            required
+          >
+            <option value="">Choose target audience...</option>
+            <optgroup label="Community">
+              {targetAudienceOptions.community.map((audience) => (
+                <option key={audience} value={`community-${audience}`}>{audience}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Company">
+              {targetAudienceOptions.company.map((audience) => (
+                <option key={audience} value={`company-${audience}`}>{audience}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Education">
+              {targetAudienceOptions.education.map((audience) => (
+                <option key={audience} value={`education-${audience}`}>{audience}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Individual">
+              {targetAudienceOptions.individual.map((audience) => (
+                <option key={audience} value={`individual-${audience}`}>{audience}</option>
+              ))}
+            </optgroup>
+            <optgroup label="Fitness Coach">
+              {targetAudienceOptions.fitnessCoach.map((audience) => (
+                <option key={audience} value={`fitnessCoach-${audience}`}>{audience}</option>
+              ))}
+            </optgroup>
+          </select>
+        </div>
       </div>
     </div>
   );
@@ -1183,25 +1191,39 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-md mx-auto px-6">
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-6">
-            <Button
-              onClick={onBack}
-              variant="ghost"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Back
-            </Button>
-            <h1 className="text-2xl font-bold">Create Challenge</h1>
-            <div></div>
+        {/* Header */}
+        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/20">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={onBack}
+                className="hover:bg-white/10"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+              <div>
+                <h1 className="text-lg font-bold">Create Challenge</h1>
+                <p className="text-xs text-muted-foreground">Step {currentStep} of 7</p>
+              </div>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {Math.round((currentStep / 7) * 100)}%
+            </div>
           </div>
-
-          {currentStep < 7 && renderProgressBar()}
+          
+          {/* Progress Bar */}
+          <div className="h-1 bg-muted">
+            <div 
+              className="h-full bg-gradient-to-r from-primary to-purple-500 transition-all duration-300"
+              style={{ width: `${(currentStep / 7) * 100}%` }}
+            />
+          </div>
         </div>
 
-        <div className="bg-card rounded-lg p-6 mb-6">
+        {/* Content */}
+        <div className="p-4 space-y-6">
           {currentStep === 1 && renderStep1()}
           {currentStep === 2 && renderStep2()}
           {currentStep === 3 && renderStep3()}
@@ -1212,7 +1234,7 @@ const CreateChallenge = ({ onBack }: CreateChallengeProps) => {
         </div>
 
         {currentStep < 7 && (
-          <div className="flex gap-4">
+          <div className="flex gap-4 p-4">
             {currentStep > 1 && (
               <Button
                 onClick={prevStep}

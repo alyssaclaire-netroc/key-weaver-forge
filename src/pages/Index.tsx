@@ -27,6 +27,10 @@ const Index = () => {
   const [userEmail, setUserEmail] = useState("");
   const [otpPurpose, setOtpPurpose] = useState<"signup" | "password-reset" | "login">("signup");
   const [userRole, setUserRole] = useState("");
+  const [profileData, setProfileData] = useState<{ name: string; profileImage: string }>({
+    name: "John Commander",
+    profileImage: ""
+  });
 
   const handleLoginSubmit = (email: string) => {
     setUserEmail(email);
@@ -93,6 +97,10 @@ const Index = () => {
 
   const handleEditProfile = () => {
     setCurrentStep("edit-profile");
+  };
+
+  const handleProfileUpdate = (data: { name: string; profileImage: string }) => {
+    setProfileData(data);
   };
 
   const handleBackToAuth = () => {
@@ -165,6 +173,7 @@ const Index = () => {
           onLogout={handleLogout}
           onCreateChallenge={handleCreateChallenge}
           onEditProfile={handleEditProfile}
+          profileData={profileData}
         />
       );
 
@@ -180,6 +189,7 @@ const Index = () => {
         <EditProfile
           onBack={() => setCurrentStep("dashboard")}
           onLogout={handleLogout}
+          onProfileUpdate={handleProfileUpdate}
         />
       );
 

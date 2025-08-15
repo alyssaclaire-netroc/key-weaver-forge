@@ -22,9 +22,10 @@ import {
 interface EditProfileProps {
   onBack: () => void;
   onLogout: () => void;
+  onProfileUpdate?: (data: { name: string; profileImage: string }) => void;
 }
 
-const EditProfile = ({ onBack, onLogout }: EditProfileProps) => {
+const EditProfile = ({ onBack, onLogout, onProfileUpdate }: EditProfileProps) => {
   const [profileData, setProfileData] = useState({
     name: "John Commander",
     address: "123 Main Street, Singapore 123456",
@@ -36,7 +37,8 @@ const EditProfile = ({ onBack, onLogout }: EditProfileProps) => {
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [profileImage, setProfileImage] = useState("/placeholder.svg");
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
   const achievements = [
@@ -53,10 +55,22 @@ const EditProfile = ({ onBack, onLogout }: EditProfileProps) => {
   };
 
   const handleSave = (field: string, value: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setProfileData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      };
+      
+      // Notify parent component of profile updates
+      if (field === 'name' && onProfileUpdate) {
+        onProfileUpdate({
+          name: value,
+          profileImage: profileImage || ""
+        });
+      }
+      
+      return newData;
+    });
     setEditingField(null);
     
     toast({
@@ -65,12 +79,49 @@ const EditProfile = ({ onBack, onLogout }: EditProfileProps) => {
     });
   };
 
-  const handleImageUpload = () => {
-    // Mock image upload
-    toast({
-      title: "Profile picture updated",
-      description: "Your profile picture has been updated successfully.",
-    });
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setIsUploading(true);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setProfileImage(result);
+        setIsUploading(false);
+        
+        // Notify parent component of profile image update
+        if (onProfileUpdate) {
+          onProfileUpdate({
+            name: profileData.name,
+            profileImage: result
+          });
+        }
+        
+        toast({
+          title: "Profile picture updated",
+          description: "Your profile picture has been updated successfully.",
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const ProfileField = ({ 
@@ -179,17 +230,27 @@ const EditProfile = ({ onBack, onLogout }: EditProfileProps) => {
               <div className="flex flex-col items-center text-center">
                 <div className="relative mb-4">
                   <Avatar className="w-24 h-24 border-4 border-background">
-                    <AvatarImage src={profileImage} />
+                    <AvatarImage src={profileImage || undefined} />
                     <AvatarFallback className="text-lg font-bold">
                       {profileData.name.split(' ').map(n => n[0]).join('')}
                     </AvatarFallback>
                   </Avatar>
-                  <button
-                    onClick={handleImageUpload}
-                    className="absolute -bottom-1 -right-1 p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="profile-image-upload"
+                    disabled={isUploading}
+                  />
+                  <label
+                    htmlFor="profile-image-upload"
+                    className={`absolute -bottom-1 -right-1 p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors cursor-pointer ${
+                      isUploading ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                   >
                     <Upload className="w-3 h-3" />
-                  </button>
+                  </label>
                 </div>
                 
                 <h2 className="text-xl font-bold mb-1">{profileData.name}</h2>
