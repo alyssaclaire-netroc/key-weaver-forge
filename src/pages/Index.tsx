@@ -8,6 +8,7 @@ import PasswordResetFlow from "@/components/auth/PasswordResetFlow";
 import PersonaSelection from "@/components/PersonaSelection";
 import CommanderDashboard from "@/components/commander/CommanderDashboard";
 import CreateChallenge from "@/pages/CreateChallenge";
+import EditProfile from "@/pages/EditProfile";
 
 type AuthStep = 
   | "auth" 
@@ -18,17 +19,19 @@ type AuthStep =
   | "password-reset" 
   | "persona-selection" 
   | "dashboard"
-  | "create-challenge";
+  | "create-challenge"
+  | "edit-profile";
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState<AuthStep>("auth");
   const [userEmail, setUserEmail] = useState("");
-  const [otpPurpose, setOtpPurpose] = useState<"signup" | "password-reset">("signup");
+  const [otpPurpose, setOtpPurpose] = useState<"signup" | "password-reset" | "login">("signup");
   const [userRole, setUserRole] = useState("");
 
   const handleLoginSubmit = (email: string) => {
     setUserEmail(email);
-    setCurrentStep("password-reset-check");
+    setOtpPurpose("login");
+    setCurrentStep("otp-verification");
   };
 
   const handleSignupSubmit = (email: string) => {
@@ -57,18 +60,17 @@ const Index = () => {
   const handleOTPVerificationSuccess = () => {
     if (otpPurpose === "signup") {
       setCurrentStep("role-selection");
-    } else {
+    } else if (otpPurpose === "password-reset") {
       setCurrentStep("password-reset");
+    } else if (otpPurpose === "login") {
+      setCurrentStep("password-reset-check");
     }
   };
 
   const handleRoleSelected = (role: string) => {
     setUserRole(role);
-    if (role === "commander") {
-      setCurrentStep("dashboard");
-    } else {
-      setCurrentStep("persona-selection");
-    }
+    // All roles now go to persona selection first
+    setCurrentStep("persona-selection");
   };
 
   const handlePasswordResetSuccess = () => {
@@ -87,6 +89,10 @@ const Index = () => {
 
   const handleCreateChallenge = () => {
     setCurrentStep("create-challenge");
+  };
+
+  const handleEditProfile = () => {
+    setCurrentStep("edit-profile");
   };
 
   const handleBackToAuth = () => {
@@ -158,6 +164,7 @@ const Index = () => {
         <CommanderDashboard 
           onLogout={handleLogout}
           onCreateChallenge={handleCreateChallenge}
+          onEditProfile={handleEditProfile}
         />
       );
 
@@ -165,6 +172,14 @@ const Index = () => {
       return (
         <CreateChallenge
           onBack={() => setCurrentStep("dashboard")}
+        />
+      );
+
+    case "edit-profile":
+      return (
+        <EditProfile
+          onBack={() => setCurrentStep("dashboard")}
+          onLogout={handleLogout}
         />
       );
 

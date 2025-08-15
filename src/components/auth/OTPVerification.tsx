@@ -8,7 +8,7 @@ interface OTPVerificationProps {
   email: string;
   onVerificationSuccess: () => void;
   onBack: () => void;
-  purpose: "signup" | "password-reset";
+  purpose: "signup" | "password-reset" | "login";
 }
 
 const OTPVerification = ({ email, onVerificationSuccess, onBack, purpose }: OTPVerificationProps) => {
@@ -115,7 +115,7 @@ const OTPVerification = ({ email, onVerificationSuccess, onBack, purpose }: OTPV
                   onClick={onBack}
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  ← Back to {purpose === "signup" ? "Sign Up" : "Login"}
+                  ← Back to {purpose === "signup" ? "Sign Up" : purpose === "login" ? "Login" : "Login"}
                 </button>
               </div>
             </div>
