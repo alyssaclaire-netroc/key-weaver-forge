@@ -130,16 +130,15 @@ const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-md mx-auto px-6 flex items-center justify-center min-h-screen">
-        {/* Clean floating background circles */}
-        <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute top-1/3 right-1/3 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute bottom-1/3 left-1/3 w-36 h-36 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
-        </div>
+    <div className="min-h-screen flex items-center justify-center p-6">
+      {/* Clean floating background circles */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/3 right-1/3 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-1/3 left-1/3 w-36 h-36 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }}></div>
+      </div>
 
-        <div className="w-full z-10 relative">
+      <div className="w-full max-w-md z-10 relative">
         <Card className="glass-card p-6">
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-foreground mb-2">
@@ -309,7 +308,6 @@ const AuthModal = ({ onAuthSuccess, onSignupSuccess }: AuthModalProps) => {
               </button>
             </div>
         </Card>
-        </div>
       </div>
     </div>
   );
